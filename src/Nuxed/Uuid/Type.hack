@@ -9,15 +9,11 @@ enum Type: int as int {
 /**
  * Retrieve the type of the given UUID.
  */
-function type(string $uuid): ?Type {
+function type(string $uuid): Type {
   if (is_null($uuid)) {
     return Type::Null;
   }
 
-  $details = _Private\parse($uuid);
-  if (null === $details) {
-    return null;
-  }
-
-  return Type::coerce(($details['time_hi_and_version'] >> 12) & 0xF);
+  $fields = fields($uuid);
+  return Type::assert(($fields['time_hi_version'] >> 12) & 0xF);
 }
