@@ -2,11 +2,13 @@ namespace Nuxed\Uuid;
 
 use namespace HH\Lib\Str;
 
-function decode(string $uuid): ?string {
-  $data = \unpack('H*', $uuid);
+function decode(string $input): string {
+  $data = \unpack('H*', $input);
   $data = $data[1];
   if (32 !== Str\length($data)) {
-    return null;
+    throw new Exception\InvalidArgumentException(
+      'Invalid binary representation for uuid.',
+    );
   }
 
   $uuid = Str\format(
@@ -17,9 +19,12 @@ function decode(string $uuid): ?string {
     Str\slice($data, 16, 4),
     Str\slice($data, 20, 12),
   );
-  $details = _Private\parse($uuid);
-  if ($details is null) {
-    return null;
+
+  if (!is_valid($uuid)) {
+    throw new Exception\RuntimeException(Str\format(
+      'unable to construct a valid uuid from given input ( %s )',
+      $input,
+    ));
   }
 
   return $uuid;
